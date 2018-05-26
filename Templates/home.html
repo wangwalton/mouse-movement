@@ -33,7 +33,7 @@
 </div>
 <p align="center" id="demo"></p>
 <p align="center" id="demo2"></p>
-
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>	
 	var x_a = [];
 	var y_a = [];
@@ -46,6 +46,12 @@ function start(event) {
 }
 
 function end(event) {
+	//send info to frontend
+	$.post( "/sendjs", {
+		javascript_data_x: x_a.toString(),
+		javascript_data_y: x_a.toString()
+	});
+	
 	x_a = [];
 	y_a = [];
 	recordMouse = false;
