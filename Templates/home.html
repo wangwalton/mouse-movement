@@ -30,8 +30,8 @@
 
 </canvas> -->
 <center>
-<svg onmousemove="showCoords(event)" style="border:1px solid #000000">
-	  <circle style="display:block;" onclick="toggle_visibility('c2', 'c1')" id ='c1' cx="50" cy="50" r="40" stroke="greenyellow" stroke-width="3" fill="yellow" />
+<svg onmousemove='coordUpdate(event)' style="border:1px solid #000000">
+	  <circle style="display:none;" onclick="toggle_visibility('c2', 'c1')" id ='c1' cx="50" cy="50" r="40" stroke="greenyellow" stroke-width="3" fill="yellow" />
 	  <circle style="display:none;" onclick="toggle_visibility('c3', 'c2')" id ='c2' cx="700" cy="200" r="40" stroke="greenyellow" stroke-width="3" fill="yellow" />
 	  <circle style="display:none;" onclick="toggle_visibility('c4', 'c3')" id ='c3' cx="223" cy="500" r="40" stroke="greenyellow" stroke-width="3" fill="yellow" />
 	  <circle style="display:none;" onclick="toggle_visibility('c5', 'c4')" id ='c4' cx="245" cy="240" r="40" stroke="greenyellow" stroke-width="3" fill="yellow" />
@@ -46,13 +46,22 @@
 
 <center><button align-'center' onclick="end(event)" type="button">end</button></center>
 </div>
+<p align="center" id="time"></p>
 <p align="center" id="demo"></p>
-<p align="center" id="demo2"></p>
+<p align="center" id="xcords"></p>
+<p align="center" id="ycords"></p>
+<p align="center" id="tcords"></p>
+<p align="center" id="temp"></p>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>	
 	var x_a = [];
 	var y_a = [];
+	var time_a = [];
 	var recordMouse = false;
+	var startTime = 0;
+	var elapsedTime = 0;
+
+	var myX, myY;
 
 function toggle_visibility(id1, id2) {
            var e = document.getElementById(id1);
@@ -69,15 +78,24 @@ function toggle_visibility(id1, id2) {
         }
 function reset_visibility() {
 	var cirs = document.getElementsByTagName("circle");
-	cirs[0].setAttribute("style", "display: block;");
-	for (var i = 1; i < cirs.length; i++) {
+	for (var i = 0; i < cirs.length; i++) {
 		cirs[i].setAttribute("style", "display: none;");
 	}
 }
 function start(event) {
+	// Clear arrays
 	x_a = [];
 	y_a = [];
+	time_a = [];
+	// Get Time
+	startTime = Date.now();
+
 	recordMouse = true;
+	var cirs = document.getElementsByTagName("circle");
+	cirs[0].setAttribute("style", "display: block;");
+	for (var i = 1; i < cirs.length; i++) {
+		cirs[i].setAttribute("style", "display: none;");
+	}
 }
 
 function end(event) {
@@ -86,12 +104,23 @@ function end(event) {
 		javascript_data_x: x_a.toString(),
 		javascript_data_y: x_a.toString()
 	});
-	
-	x_a = [];
-	y_a = [];
+
 	recordMouse = false;
 	removeElementsByClass('dot')
 	reset_visibility()
+
+	document.getElementById("time").innerHTML = "";
+	document.getElementById("demo").innerHTML = "";
+	document.getElementById("xcords").innerHTML = "";
+	document.getElementById("ycords").innerHTML = "";
+	document.getElementById("tcords").innerHTML = "";
+
+	//var array = [['asf']];
+	//array.push(x_a);
+	document.getElementById("temp").innerHTML = x_a.toString();
+	x_a = [];
+	y_a = [];
+	time_a = [];
 }
 
 function removeElementsByClass(className){
@@ -101,25 +130,104 @@ function removeElementsByClass(className){
     }
 }
 
-function showCoords(event) {
+function timer() {
+	setInterval(add, 100);
+}
+
+timer();
+
+function add() {
 	if (recordMouse == true) {
-    var x = event.pageX;
-    var y = event.pageY;
-    var coords = "X coords: " + x + ", Y coords: " + y;
-    document.getElementById("demo").innerHTML = coords;
-    x_a.push(x);
-    y_a.push(y);
+		elapsedTime = Date.now() - startTime;
+		var timeStr = "Time: " + elapsedTime + "ms"
+		document.getElementById("time").innerHTML = timeStr ;
+	}
+}
 
-    // Add a dot to follow the cursor
-      dot = document.createElement('div');
-      dot.className = "dot";
-      dot.style.left = event.pageX - 5 + "px";
-      dot.style.top = event.pageY - 5 + "px";
-      document.body.appendChild(dot);
+function mouseProcessor() {
+	setInterval(showCoords, 100);
+}
 
-    x_a.toString()
-    y_a.toString()
-    document.getElementById("demo2").innerHTML = x_a;
+mouseProcessor();
+
+function coordUpdate(event) {
+
+	if (recordMouse == true) {
+
+		myX = event.pageX;
+	    myY = event.pageY;
+
+	          dot = document.createElement('div');
+	      dot.className = "dot";
+	      dot.style.left = event.pageX - 5 + "px";
+	      dot.style.top = event.pageY - 5 + "px";
+	      document.body.appendChild(dot);
+	}
+
+}
+
+function exportToCsv(filename, rows) {
+        var processRow = function (row) {
+            var finalVal = '';
+            for (var j = 0; j < row.length; j++) {
+                var innerValue = row[j] === null ? '' : row[j].toString();
+                if (row[j] instanceof Date) {
+                    innerValue = row[j].toLocaleString();
+                };
+                var result = innerValue.replace(/"/g, '""');
+                if (result.search(/("|,|\n)/g) >= 0)
+                    result = '"' + result + '"';
+                if (j > 0)
+                    finalVal += ',';
+                finalVal += result;
+            }
+            return finalVal + '\n';
+        };
+
+        var csvFile = '';
+        for (var i = 0; i < rows.length; i++) {
+            csvFile += processRow(rows[i]);
+        }
+
+        var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+        if (navigator.msSaveBlob) { // IE 10+
+            navigator.msSaveBlob(blob, filename);
+        } else {
+            var link = document.createElement("a");
+            if (link.download !== undefined) { // feature detection
+                // Browsers that support HTML5 download attribute
+                var url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+}
+function showCoords() {
+	if (recordMouse == true) {
+	    var t = Date.now() - startTime
+
+	    var coords = "X coords: " + myX + ", Y coords: " + myY;
+	    document.getElementById("demo").innerHTML = coords;
+
+	    x_a.push(myX);
+	    y_a.push(myY);
+	    time_a.push(t);
+
+	    // Add a dot to follow the cursor
+	
+
+	    var x_slice = "X coords: " + x_a.slice(Math.max(x_a.length-10, 1)).toString();
+	    var y_slice = "Y coords: " + y_a.slice(Math.max(y_a.length-10, 1)).toString();
+	    var t_slice = "Time coords: " + time_a.slice(Math.max(time_a.length-10, 1)).toString();
+
+	    document.getElementById("xcords").innerHTML = x_slice;
+	    document.getElementById("ycords").innerHTML = y_slice;
+	    document.getElementById("tcords").innerHTML = t_slice;
+
 }
 }
 
