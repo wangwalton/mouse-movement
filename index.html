@@ -1,11 +1,7 @@
-
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-<meta name="robots" content="noindex">
-  <title>Example</title>
-  <style>
+<body>
+<style>
     body {
       height: 3000px;
     }
@@ -15,40 +11,77 @@
       background-color: black;
       position: absolute;
     }
+
+    canvas {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 800px;
+    height: 650px;
+}
   </style>
-</head>
-<body>
-<script>
-  (function() {
+  <div>
+  	<center>
+  	<button align-'center' onclick="start(event)" type="button">start</button>
+  </center>
+<canvas onmousemove="showCoords(event)" id="myCanvas" style="border:1px solid #000000;">
 
-    document.onmousemove = handleMouseMove;
-    function handleMouseMove(event) {
-      var dot, eventDoc, doc, body, pageX, pageY;
-      
-      // If pageX/Y aren't available and clientX/Y
-      // are, calculate pageX/Y - logic taken from jQuery
-			// Calculate pageX/Y if missing and clientX/Y available
-      if (event.pageX == null && event.clientX != null) {
-        eventDoc = (event.target && event.target.ownerDocument) || document;
-        doc = eventDoc.documentElement;
-        body = eventDoc.body;
+</canvas>
+<center><button align-'center' onclick="end(event)" type="button">end</button></center>
+</div>
+<p align="center" id="demo"></p>
+<p align="center" id="demo2"></p>
 
-        event.pageX = event.clientX +
-          (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-          (doc && doc.clientLeft || body && body.clientLeft || 0);
-        event.pageY = event.clientY +
-          (doc && doc.scrollTop  || body && body.scrollTop  || 0) -
-          (doc && doc.clientTop  || body && body.clientTop  || 0 );
-      }
+<script>	
+	var x_a = [];
+	var y_a = [];
+	var recordMouse = false;
 
-      // Add a dot to follow the cursor
+function start(event) {
+	x_a = [];
+	y_a = [];
+	recordMouse = true;
+}
+
+function end(event) {
+	x_a = [];
+	y_a = [];
+	recordMouse = false;
+	removeElementsByClass('dot')
+}
+
+function removeElementsByClass(className){
+    var elements = document.getElementsByClassName(className);
+    while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
+
+function showCoords(event) {
+	if (recordMouse == true) {
+    var x = event.pageX;
+    var y = event.pageY;
+    var coords = "X coords: " + x + ", Y coords: " + y;
+    document.getElementById("demo").innerHTML = coords;
+    x_a.push(x);
+    y_a.push(y);
+
+    // Add a dot to follow the cursor
       dot = document.createElement('div');
       dot.className = "dot";
       dot.style.left = event.pageX + "px";
       dot.style.top = event.pageY + "px";
       document.body.appendChild(dot);
-    }
-  })();
+    x_a.toString()
+    y_a.toString()
+    document.getElementById("demo2").innerHTML = x_a;
+}
+}
+
+
 </script>
+
 </body>
 </html>
