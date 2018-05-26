@@ -19,5 +19,7 @@ def get_javascript_data():
     #Send jsdata to backend
     return "nothing"
 
+
+
 if __name__ == "__main__":
     app.run(debug=True)
