@@ -28,6 +28,7 @@
   	<input type="text" maxlength="20" id="searchTxt"/>
   	<button align='right' onclick="start(event)" type="button">start</button>
   	<button align='center' onclick="end()" type="button">end</button>
+  	<button align='center' onclick="reset()" type="button">ClearData</button>
 	<button align='center' onclick="exportCSV()" type="button">Export CSV</button>
   </center>
 <!-- <canvas onmousemove="showCoords(event)" id="myCanvas" style="border:1px solid #000000;">
@@ -57,7 +58,7 @@
 <p align="center" id="xcords"></p>
 <p align="center" id="ycords"></p>
 <p align="center" id="tcords"></p>
-<p align="center" id="temp"></p>
+<p align="center" id="rows"></p>
 
 <script>
 	var len = 100;	
@@ -93,6 +94,11 @@ function reset_visibility() {
 		cirs[i].setAttribute("style", "display: none;");
 	}
 }
+
+function reset_data() {
+	export_data = [];
+}
+
 function start(event) {
 	// Clear arrays
 	x_a = new Array(len).fill(0);
@@ -107,6 +113,7 @@ function start(event) {
 	for (var i = 1; i < cirs.length; i++) {
 		cirs[i].setAttribute("style", "display: none;");
 	}
+	document.getElementById("rows").innerHTML = "Num rows in CSV: " + export_data.length;
 }
 
 function end() {
@@ -121,10 +128,10 @@ function end() {
 	document.getElementById("xcords").innerHTML = "";
 	document.getElementById("ycords").innerHTML = "";
 	document.getElementById("tcords").innerHTML = "";
-
+	
 	export_data.push(x_a)
 	export_data.push(y_a)
-
+	document.getElementById("rows").innerHTML = "Num rows in CSV: " + export_data.length;
 	i = 0;
 	x_a = new Array(len).fill(0);
 	y_a = new Array(len).fill(0);
@@ -133,7 +140,7 @@ function end() {
 
 function exportCSV() {
 	fname = document.getElementById('searchTxt').value + '.csv';
-	document.getElementById("temp").innerHTML = export_data.length;
+	document.getElementById("rows").innerHTML = "Num rows in CSV: " + export_data.length;
 	exportToCsv(fname, export_data);
 	export_data = [];
 }
